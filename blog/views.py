@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from . models import Post,Comment,Tag,Categories
 from django.db.models import Q 
 from django.core.paginator import Paginator
+from . forms import CommentForm,PostForm
 
 # Create your views here.
 
@@ -43,3 +44,37 @@ def post_list(request):
         'tag_query' : tagQ,
      }
     return render(request, '' , context)
+
+def post_details(request,id):
+    post = get_object_or_404(Post, id=id)
+    if request.method == 'POST':
+        comment_form = CommentForm(request.Post)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False) #Database e save hobena
+            comment.post = post 
+            comment.author = request.user
+            comment.save() #Ekhon database e save hobe
+            return redirect('', id = post.id)
+    else:
+        comment_form = CommentForm()
+    comments = post.comment_set.all()
+    is_liked = post.liked_user.filter(id = request.user.id).exists()
+    like_count = post.liked_user.count()
+
+    context = {
+        'post' : post,
+        'categories' : Categories.objects.all(),
+        'tag' : Tag.objects.all(),
+        'comments' : comments,
+        'comment_form': comment_form,
+        'is_liked' : is_liked,
+        'like_count' : like_count, 
+    }
+    post.view_count += 1
+    post.save()
+
+    return render(request, '',context)
+
+
+
+        
