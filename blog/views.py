@@ -76,5 +76,43 @@ def post_details(request,id):
     return render(request, '',context)
 
 
+def liked_post(request,id):
+    post = get_object_or_404(Post, id=id)
+
+    if post.liked_user.filter(id = request.user.id):
+        post.liked_user.remove(request.user)
+    else:
+        post.liked_user.add(request.user)
+    return redirect('', id = post.id) 
+
+
+def post_create(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            return redirect('')
+    else:
+        form = PostForm()
+    
+    return render(request, ' ', {'form' : form})
+
+def post_update(request):
+    post = get_object_or_404(Post, id=id)
+    if request.method == 'POST':
+        form = PostForm(request.POST,instance=post)
+        form.save()
+        return redirect('', id = post.id)
+    else:
+        form = PostForm()
+    return render(request, '', {'form' : form})
+
+def post_delete(request):
+    post = get_object_or_404(Post, id=id)
+    post.delete()
+    return redirect('')
+
 
         
