@@ -8,6 +8,8 @@ from django.core.paginator import Paginator
 from . forms import CommentForm,PostForm
 
 # Create your views here.
+def profile(request,id):
+    post = get_object_or_404
 
 def post_list(request):
     # category, tag, searching, pagination -> post dekhate hobe
@@ -23,8 +25,8 @@ def post_list(request):
         posts = posts.filter(tag__name = tagQ)
     if searchQ:
         posts = posts.filter(
-            Q(titile_icontains = searchQ)
-            | Q(content_icontains = searchQ)
+            Q(title__icontains = searchQ)
+            | Q(content__icontains = searchQ)
             | Q(tag__name__icontains = searchQ)
             | Q(category__name__icontains = searchQ)
 
@@ -43,18 +45,18 @@ def post_list(request):
         'category_query' : categoryQ,
         'tag_query' : tagQ,
      }
-    return render(request, '' , context)
+    return render(request, 'blog/post_list.html' , context)
 
 def post_details(request,id):
     post = get_object_or_404(Post, id=id)
     if request.method == 'POST':
-        comment_form = CommentForm(request.Post)
+        comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
             comment = comment_form.save(commit=False) #Database e save hobena
             comment.post = post 
             comment.author = request.user
             comment.save() #Ekhon database e save hobe
-            return redirect('', id = post.id)
+            return redirect('post_details', id = post.id)
     else:
         comment_form = CommentForm()
     comments = post.comment_set.all()
@@ -73,7 +75,7 @@ def post_details(request,id):
     post.view_count += 1
     post.save()
 
-    return render(request, '',context)
+    return render(request, 'blog/post_details.html', context)
 
 
 def liked_post(request,id):
@@ -83,7 +85,7 @@ def liked_post(request,id):
         post.liked_user.remove(request.user)
     else:
         post.liked_user.add(request.user)
-    return redirect('', id = post.id) 
+    return redirect('liked_post', id = post.id) 
 
 
 def post_create(request):
@@ -93,26 +95,26 @@ def post_create(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-            return redirect('')
+            return redirect('post_list')
     else:
         form = PostForm()
     
-    return render(request, ' ', {'form' : form})
+    return render(request, 'blog/post_create.html', {'form' : form})
 
-def post_update(request):
+def post_update(request,id):
     post = get_object_or_404(Post, id=id)
     if request.method == 'POST':
         form = PostForm(request.POST,instance=post)
         form.save()
-        return redirect('', id = post.id)
+        return redirect('post_details', id = post.id)
     else:
         form = PostForm()
-    return render(request, '', {'form' : form})
+    return render(request, 'blog/post_create.html', {'form' : form})
 
-def post_delete(request):
+def post_delete(request,id):
     post = get_object_or_404(Post, id=id)
     post.delete()
-    return redirect('')
+    return redirect('post_list')
 
 
         
