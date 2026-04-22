@@ -14,9 +14,10 @@ def profile(request):
     section = request.GET.get('section', 'profile')
     context = {'section' : section}
 
-    if section == 'post':
+    if section == 'posts':
         post = Post.objects.filter(author = request.user)
-        context['post'] = post
+        print(post, request.user)
+        context['posts'] = post
     elif section == 'update' :
         if request.method == 'POST':
             form = UpdateProfileForm(request.POST, instance=request.user)
@@ -43,6 +44,7 @@ def post_list(request):
         posts = posts.filter(category__name = categoryQ)
     if tagQ:
         posts = posts.filter(tag__name = tagQ)
+        print(tagQ,posts)
     if searchQ:
         posts = posts.filter(
             Q(title__icontains = searchQ)
@@ -115,6 +117,7 @@ def post_create(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
+            form.save_m2m()
             return redirect('post_list')
     else:
         form = PostForm()
@@ -128,7 +131,7 @@ def post_update(request,id):
         form.save()
         return redirect('post_details', id = post.id)
     else:
-        form = PostForm()
+        form = PostForm(instance=post)
     return render(request, 'blog/post_create.html', {'form' : form})
 
 @login_required

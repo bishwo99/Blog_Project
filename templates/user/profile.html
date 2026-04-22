@@ -13,7 +13,7 @@
                 <a href="{% url 'profile' %}?section=posts" class="list-group-item list-group-item-action {% if section == 'posts' %}active{% endif %}">📝 My Posts</a>
                 <form method="post" action="{% url 'logout' %}" class="list-group-item p-0">
                     {% csrf_token %}
-                    <button class="btn btn-link w-100 text-start text-danger">🚪 Logout</button>
+                    <button class="btn btn-link w-100 text-start text-danger"> Logout</button>
                 </form>
             </div>
         </div>
